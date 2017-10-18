@@ -27,14 +27,18 @@ RUN apt-add-repository ppa:nginx/stable -y && \
     sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt/ trusty-pgdg main" >> /etc/apt/sources.list.d/postgresql.list' && \
     curl -s https://packagecloud.io/gpg.key | apt-key add - && \
     echo "deb http://packages.blackfire.io/debian any main" | tee /etc/apt/sources.list.d/blackfire.list && \
-    curl --silent --location https://deb.nodesource.com/setup_5.x | bash - && \
+    # curl --silent --location https://deb.nodesource.com/setup_5.x | bash - && \
+    curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.5/install.sh | bash \
     apt-get update
 
 # set the locale
 RUN echo "LC_ALL=en_US.UTF-8" >> /etc/default/locale  && \
     locale-gen en_US.UTF-8  && \
     ln -sf /usr/share/zoneinfo/UTC /etc/localtime
-    
+
+# nvm command
+RUN command -v nvm
+
 # setup bash
 COPY .bash_aliases /root
 
@@ -98,7 +102,7 @@ VOLUME ["/var/lib/mysql"]
 RUN curl -sS https://getcomposer.org/installer | php && \
     mv composer.phar /usr/local/bin/composer && \
     printf "\nPATH=\"~/.composer/vendor/bin:\$PATH\"\n" | tee -a ~/.bashrc
-    
+
 # install prestissimo
 # RUN composer global require "hirak/prestissimo"
 
@@ -108,8 +112,9 @@ RUN composer global require "laravel/envoy"
 #install laravel installer
 RUN composer global require "laravel/installer"
 
-# install nodejs
-RUN apt-get install -y nodejs
+# install nodejs - nodejs using nvm
+# RUN apt-get install -y nodejs
+RUN nvm install 8
 
 # install gulp
 RUN /usr/bin/npm install -g gulp
